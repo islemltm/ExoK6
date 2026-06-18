@@ -1,29 +1,47 @@
 pipeline {
-    agent none
+    agent any
 
     stages {
 
-        stage('Installation dépendances') {
-            agent {
-                docker {
-                    image 'node:22'
-                }
-            }
+        stage('Installer Node.js') {
             steps {
-                sh 'node --version'
-                sh 'npm --version'
+                sh '''
+                    apt-get update
+                    apt-get install -y nodejs npm
+
+                    node --version
+                    npm --version
+                '''
+            }
+        }
+
+        stage('Installer K6') {
+            steps {
+                sh '''
+                    apt-get update
+                    apt-get install -y gnupg curl
+
+                    curl -fsSL https://dl.k6.io/key.gpg | gpg --dearmor -o /usr/share/keyrings/k6-archive-keyring.gpg
+
+                    echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" \
+                    > /etc/apt/sources.list.d/k6.list
+
+                    apt-get update
+                    apt-get install -y k6
+
+                    k6 version
+                '''
+            }
+        }
+
+        stage('Installer dépendances') {
+            steps {
                 sh 'npm install'
             }
         }
 
-        stage('Lancement du test K6') {
-            agent {
-                docker {
-                    image 'grafana/k6'
-                }
-            }
+        stage('Exécuter le test') {
             steps {
-                sh 'k6 version'
                 sh 'k6 run k6-script.js'
             }
         }
