@@ -1,13 +1,14 @@
 pipeline {
-    agent {
-        docker {
-            image 'node:22'
-        }
-    }
+    agent none
 
     stages {
 
         stage('Installation dépendances') {
+            agent {
+                docker {
+                    image 'node:22'
+                }
+            }
             steps {
                 sh 'node --version'
                 sh 'npm --version'
@@ -16,12 +17,14 @@ pipeline {
         }
 
         stage('Lancement du test K6') {
+            agent {
+                docker {
+                    image 'grafana/k6'
+                }
+            }
             steps {
-                sh '''
-                    docker run --rm \
-                    -v $WORKSPACE:/scripts \
-                    grafana/k6 run /scripts/k6-script.js
-                '''
+                sh 'k6 version'
+                sh 'k6 run k6-script.js'
             }
         }
     }
