@@ -1,7 +1,7 @@
 pipeline{
     agent {
         docker{
-            image 'mcr.microsoft.com/playwright:v1.60.0-noble'
+            image 'grafana/k6:latest'
         }
     }
     stages{
